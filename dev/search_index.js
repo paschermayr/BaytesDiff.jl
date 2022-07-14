@@ -1,0 +1,3 @@
+var documenterSearchIndex = {"docs":
+[{"location":"intro/#Introduction","page":"Introduction","title":"Introduction","text":"","category":"section"},{"location":"intro/","page":"Introduction","title":"Introduction","text":"Yet to be done.","category":"page"},{"location":"","page":"Home","title":"Home","text":"CurrentModule = BaytesDiff","category":"page"},{"location":"#BaytesDiff","page":"Home","title":"BaytesDiff","text":"","category":"section"},{"location":"","page":"Home","title":"Home","text":"Documentation for BaytesDiff.","category":"page"},{"location":"","page":"Home","title":"Home","text":"","category":"page"},{"location":"","page":"Home","title":"Home","text":"Modules = [BaytesDiff]","category":"page"}]
+}
