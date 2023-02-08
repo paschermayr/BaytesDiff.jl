@@ -1,15 +1,17 @@
 ################################################################################
-dat = randn(100)
+dat = randn(_RNG, 100)
+dat[1:5] = collect(1:5) .+ 0.0
 μ₀ = 1.0
 σ₀ = 2.0
+_args = (a =  1., b = collect(1:100) .+ 0.0)
 ################################################################################
 # Create custom Model ~ Name it to avoid name collision
-_param = (μ=Param(μ₀, Distributions.Normal()), σ=Param(σ₀, Distributions.Exponential()))
-struct SossBenchmark <: ModelName end
-modelSossBM = ModelWrapper(SossBenchmark(), _param)
-obectiveSossBM = Objective(modelSossBM, dat)
+_param = (μ=Param(Distributions.Normal(), μ₀,), σ=Param(Distributions.Exponential(), σ₀,))
+struct Benchmark <: ModelName end
+modelBM = ModelWrapper(Benchmark(), _param)
+obectiveBM = Objective(modelBM, dat)
 
-function (objective::Objective{<:ModelWrapper{SossBenchmark}})(θ::NamedTuple)
+function (objective::Objective{<:ModelWrapper{Benchmark}})(θ::NamedTuple)
     lp =
         Distributions.logpdf(Distributions.Normal(), θ.μ) +
         Distributions.logpdf(Distributions.Exponential(), θ.σ)
@@ -18,6 +20,38 @@ function (objective::Objective{<:ModelWrapper{SossBenchmark}})(θ::NamedTuple)
         iter in eachindex(objective.data)
     )
     return lp + ll
+end
+
+################################################################################
+# Create custom Model ~ Name it to avoid name collision
+_paramHBM = (μ=Param(Distributions.Normal(), μ₀,), σ=Param(Distributions.Exponential(), σ₀,))
+struct HessianBM <: ModelName end
+modelHBM = ModelWrapper(HessianBM(), _paramHBM)
+obectiveHBM = Objective(modelHBM, dat)
+
+function (objective::Objective{<:ModelWrapper{HessianBM}})(θ::NamedTuple)
+    return 0.0
+end
+
+################################################################################
+# Create custom Model that works with Enzyme and checks if constant fields are mutated
+struct EnzymeBM <: ModelName end
+_param = (μ=Param(Distributions.Normal(), μ₀,), σ=Param(Distributions.Exponential(), σ₀,))
+modelEBM = ModelWrapper(EnzymeBM(), _param, _args)
+obectiveEBM = Objective(modelEBM, dat)
+
+function (objective::Objective{<:ModelWrapper{EnzymeBM}})(θ::NamedTuple, arg::A = objective.model.arg, data::D = objective.data) where {A, D}
+    μ = θ.μ + arg.a + mean(arg.b)
+    #=
+    #!NOTE: Up until at least Enzyme 10.16, Enzyme mutates model.arg and objective.data even if specified as constant
+    lp =
+        Distributions.logpdf(Distributions.Normal(), μ) +
+        Distributions.logpdf(Distributions.Exponential(), θ.σ)
+    ll = sum( logpdf(Normal(μ, θ.σ), dat) for dat in data )
+    return ll #+ lp
+    =#
+    ll = sum( logpdf(Normal(μ, θ.σ), dat) for dat in data )
+    return ll
 end
 
 ############################################################################################

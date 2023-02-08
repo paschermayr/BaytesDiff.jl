@@ -1,7 +1,7 @@
 name = "BaytesDiff"
 uuid = "12a76ff9-393d-487f-8b39-e615b97e2f77"
 authors = ["Patrick Aschermayr <p.aschermayr@gmail.com>"]
-version = "0.1.1"
+version = "0.2.0"
 
 [deps]
 ArgCheck = "dce04be8-c92d-5529-be00-80e4d2c0e197"
@@ -10,6 +10,7 @@ ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 DiffResults = "163ba53b-c6d8-5494-b064-1a9d43ac40c5"
 DistributionsAD = "ced4e74d-a319-5a8a-b0ac-84af2272839c"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
+Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 ModelWrappers = "44c54197-9f56-47cc-9960-7f2e20bfb0d6"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
@@ -24,17 +25,18 @@ ChainRulesCore = "1"
 DiffResults = "1"
 DistributionsAD = "0.6"
 DocStringExtensions = "0.8, 0.9"
+Enzyme = "0.10"
 ForwardDiff = "0.10"
-ModelWrappers = "0.3"
-ReverseDiff = "1.12"
+ModelWrappers = "0.4"
+ReverseDiff = "1.14"
 UnPack = "1"
 Zygote = "0.6"
 julia = "^1.7"
 
 [extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test", "Distributions", "LinearAlgebra"]

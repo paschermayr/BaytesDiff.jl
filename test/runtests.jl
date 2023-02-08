@@ -8,7 +8,7 @@ using Distributions, LinearAlgebra
 ############################################################################################
 # Import Baytes Packages
 using ModelWrappers, BaytesDiff
-using ForwardDiff, ReverseDiff, Zygote
+using ForwardDiff, ReverseDiff, Zygote, Enzyme
 ############################################################################################
 # Include Files
 include("TestHelper.jl")

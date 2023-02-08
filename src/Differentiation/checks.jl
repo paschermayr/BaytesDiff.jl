@@ -13,7 +13,7 @@ function check_gradients(
     objective::Objective,
     ADlibraries = [:ForwardDiff, :ReverseDiff, :Zygote],
     θᵤ = randn(_rng, length(objective)),
-    difftune = map(backend -> DiffObjective(objective, AutomaticDiffTune(backend, objective)), ADlibraries);
+    difftune = map(backend -> DiffObjective(objective, AutomaticDiffTune(objective, backend)), ADlibraries);
     printoutput = true
 )
 ## Compute Gradients

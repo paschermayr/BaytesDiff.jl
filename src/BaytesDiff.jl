@@ -33,7 +33,7 @@ using UnPack: UnPack, @unpack, @pack!
 using Random: Random, AbstractRNG, GLOBAL_RNG
 
 using ChainRulesCore, DistributionsAD, DiffResults
-using ForwardDiff, ReverseDiff, Zygote
+using ForwardDiff, ReverseDiff, Zygote, Enzyme
 
 ############################################################################################
 #Import

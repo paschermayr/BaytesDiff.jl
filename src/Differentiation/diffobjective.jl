@@ -15,15 +15,28 @@ struct DiffObjective{O<:Objective,T<:AbstractDifferentiableTune}
 end
 
 ############################################################################################
-function _log_density(diff::DiffObjective, θᵤ::AbstractVector{T}) where {T<:Real}
-    return diff.objective(θᵤ)
-end
-function _log_density_and_gradient(
-    diff::DiffObjective, θᵤ::AbstractVector{T}
+function log_density(
+    diff::DiffObjective,
+    θᵤ::AbstractVector{T}=unconstrain_flatten(diff.objective.model, diff.objective.tagged),
 ) where {T<:Real}
-    return _log_density_and_gradient(diff.objective, diff.tune, θᵤ)
+    return log_density(diff.objective, diff.tune, θᵤ)
+end
+function log_density_and_gradient(
+    diff::DiffObjective,
+    θᵤ::AbstractVector{T}=unconstrain_flatten(diff.objective.model, diff.objective.tagged),
+) where {T<:Real}
+    return log_density_and_gradient(diff.objective, diff.tune, θᵤ)
+end
+function log_density_and_gradient_and_hessian(
+    diff::DiffObjective,
+    θᵤ::AbstractVector{T}=unconstrain_flatten(diff.objective.model, diff.objective.tagged),
+) where {T<:Real}
+    return log_density_and_gradient_and_hessian(diff.objective, diff.tune, θᵤ)
 end
 
 ############################################################################################
 #export
-export DiffObjective
+export DiffObjective,
+    log_density,
+    log_density_and_gradient,
+    log_density_and_gradient_and_hessian

@@ -6,9 +6,11 @@ Stores information for evaluating and taking the gradient of an objective functi
 # Fields
 $(TYPEDFIELDS)
 """
-struct AnalyticalDiffTune{G<:Function} <: AbstractDifferentiableTune
+struct AnalyticalDiffTune{G<:Function, H<:Union{Nothing, Function}} <: AbstractDifferentiableTune
     "Gradient as function of ℓobjective and parameter vector in unconstrained space, gradient(ℓobjective, θᵤ)."
     gradient::G
+    "Hessian as function of ℓobjective and parameter vector in unconstrained space, hessian(ℓobjective, θᵤ)."
+    hessian::H
 end
 
 ############################################################################################
@@ -26,6 +28,11 @@ function _log_density_and_gradient(
     objective::Objective, tune::AnalyticalDiffTune, θᵤ::AbstractVector{T}
 ) where {T<:Real}
     return objective(θᵤ), tune.gradient(objective, θᵤ)
+end
+function _log_density_and_gradient_and_hessian(
+    objective::Objective, tune::AnalyticalDiffTune, θᵤ::AbstractVector{T}
+) where {T<:Real}
+    return objective(θᵤ), tune.gradient(objective, θᵤ), tune.hessian(objective, θᵤ)
 end
 
 ############################################################################################
