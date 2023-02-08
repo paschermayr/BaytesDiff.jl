@@ -186,7 +186,6 @@ end
 
 ############################################################################################
 # Differentiation - Enzyme
-@test_throws
 @testset "AutoDiffContainer - Log Objective AutoDiff compatibility - Enzyme" begin
     ## Assign DiffTune
     _objective = obectiveEBM
