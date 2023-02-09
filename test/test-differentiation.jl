@@ -337,3 +337,39 @@ fun1(objectiveExample, θᵤ)
     @test _ld == _ldgresult.ℓθᵤ
     @test all(_ldgresult.θᵤ .== θᵤ)
 end
+############################################################################################
+#Check result type conversion
+objectives = [
+    Objective(ModelWrapper(obectiveEBM.model.id, _paramEnzyme, _args, FlattenDefault()), dat),
+    Objective(ModelWrapper(obectiveEBM.model.id, _paramEnzyme, _args, FlattenDefault(; output = Float32)), dat)
+]
+backends = [:ForwardDiff, :ReverseDiff, :ReverseDiffUntaped, :Zygote, :EnzymeReverse]#, :EnzymeForward, :EnzymeReverse]
+
+@testset "AbstractDifferentiation - correct Type conversion" begin
+    ## Gradient backends
+    for backend in backends
+        for _objective in objectives
+            #Check type
+            valtype = typeof(_objective.temperature)
+            θᵤ = randn(valtype, length(_objective))
+
+            #Create tune
+            difftune0 = AutomaticDiffTune(_objective, backend, DiffOrderZero())
+            difftune1 = AutomaticDiffTune(_objective, backend, DiffOrderOne())
+#            difftune2 = AutomaticDiffTune(_objective, backend, DiffOrderTwo())
+
+            diffobjective0 = DiffObjective(_objective, difftune0)
+            diffobjective1 = DiffObjective(_objective, difftune1)
+#            diffobjective2 = DiffObjective(_objective, difftune2)
+
+            # create different log results
+            result0 = BaytesDiff.log_density(diffobjective0, θᵤ)
+            result1 = BaytesDiff.log_density_and_gradient(diffobjective1, θᵤ)
+#            result2 = BaytesDiff.log_density_and_gradient_and_hessian(diffobjective2, θᵤ)
+
+            @test typeof(result0.ℓθᵤ) == valtype && eltype(result0.θᵤ) == valtype
+            @test typeof(result1.ℓθᵤ) == valtype && eltype(result1.θᵤ) == valtype && eltype(result1.∇ℓθᵤ) == valtype
+#            @test typeof(result2.ℓθᵤ) == valtype && eltype(result2.θᵤ) == valtype && eltype(result2.∇ℓθᵤ) == valtype  && eltype(result2.Δℓθᵤ) == valtype
+        end
+    end
+end

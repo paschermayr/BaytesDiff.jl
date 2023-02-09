@@ -24,13 +24,13 @@ function _log_density_and_gradient(
 ) where {T<:Real}
     error("Enzyme AD Forward Mode framework currently not implemented")
 #=
-    _shadow = zeros(length(T, θᵤ))
+    _shadow = zeros(T, length(θᵤ))
     val, _ = Enzyme.autodiff(Enzyme.ForwardMode(), objective, Enzyme.Duplicated,
         Enzyme.Duplicated(θᵤ, _shadow),
         Enzyme.Const(objective.model.arg),
         Enzyme.Const(objective.data),
     )
-    val, _shadow
+    T(val), _shadow
 =#
 end
 
@@ -79,7 +79,7 @@ function _log_density_and_gradient(
         Enzyme.Const(objective.model.arg),
         Enzyme.Const(objective.data),
     )
-    return objective(θᵤ), _shadow
+    return T(objective(θᵤ)), _shadow
 end
 
 function _log_density_and_gradient_and_hessian(

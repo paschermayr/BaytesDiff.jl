@@ -36,8 +36,8 @@ end
 ################################################################################
 # Create custom Model that works with Enzyme and checks if constant fields are mutated
 struct EnzymeBM <: ModelName end
-_param = (μ=Param(Distributions.Normal(), μ₀,), σ=Param(Distributions.Exponential(), σ₀,))
-modelEBM = ModelWrapper(EnzymeBM(), _param, _args)
+_paramEnzyme = (μ=Param(Distributions.Normal(), μ₀,), σ=Param(Distributions.Exponential(), σ₀,))
+modelEBM = ModelWrapper(EnzymeBM(), _paramEnzyme, _args)
 obectiveEBM = Objective(modelEBM, dat)
 
 function (objective::Objective{<:ModelWrapper{EnzymeBM}})(θ::NamedTuple, arg::A = objective.model.arg, data::D = objective.data) where {A, D}
