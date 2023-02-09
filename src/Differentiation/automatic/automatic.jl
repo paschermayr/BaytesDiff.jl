@@ -5,15 +5,6 @@ Abstract super type for Supported Automatic Differentiation backends.
 """
 abstract type AutomaticDifferentiationMethod end
 
-"""
-$(TYPEDEF)
-Abstract super type that determines differentiability of objective function and configuration that is created when initiating a AutomaticDiffTune struct.
-"""
-abstract type AbstractDiffOrder end
-struct DiffOrderZero <: AbstractDiffOrder end
-struct DiffOrderOne <: AbstractDiffOrder end
-struct DiffOrderTwo <: AbstractDiffOrder end
-
 ############################################################################################
 struct AutomaticDiffTune{M<:AutomaticDifferentiationMethod,O<:AbstractDiffOrder,C} <: AbstractDifferentiableTune
     "Automatic Differentiation (AD) backend."
@@ -76,8 +67,4 @@ end
 
 ############################################################################################
 # Export
-export AutomaticDiffTune,
-    AbstractDiffOrder,
-    DiffOrderZero,
-    DiffOrderOne,
-    DiffOrderTwo
+export AutomaticDiffTune
