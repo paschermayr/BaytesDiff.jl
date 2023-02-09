@@ -27,9 +27,9 @@ end
 function ℓDensityResult(objective::Objective)
     return ℓDensityResult(objective, unconstrain_flatten(objective.model, objective.tagged))
 end
+
 function log_density(
     objective::Objective,
-    tune::AbstractDifferentiableTune,
     θᵤ::AbstractVector{T}=unconstrain_flatten(objective.model, objective.tagged),
 ) where {T<:Real}
     ℓθᵤ = objective(θᵤ)
@@ -38,6 +38,13 @@ function log_density(
     else
         ℓDensityResult(θᵤ, T(-Inf))
     end
+end
+function log_density(
+    objective::Objective,
+    tune::AbstractDifferentiableTune,
+    θᵤ::AbstractVector{T}=unconstrain_flatten(objective.model, objective.tagged),
+) where {T<:Real}
+    return log_density(objective, θᵤ)
 end
 
 ############################################################################################
