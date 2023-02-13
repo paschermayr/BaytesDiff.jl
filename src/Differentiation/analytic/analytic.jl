@@ -14,7 +14,7 @@ struct AnalyticalDiffTune{G<:Function, H<:Union{Nothing, Function}} <: AbstractD
 end
 
 ############################################################################################
-function update(tune::AnalyticalDiffTune, objective::Objective) where {T<:Real}
+function update(tune::AnalyticalDiffTune, objective::Objective)
     return tune
 end
 
