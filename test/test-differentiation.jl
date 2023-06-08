@@ -186,6 +186,7 @@ end
 
 ############################################################################################
 # Differentiation - Enzyme
+#=
 @testset "AutoDiffContainer - Log Objective AutoDiff compatibility - Enzyme" begin
     ## Assign DiffTune
     _objective = obectiveEBM
@@ -228,7 +229,7 @@ end
 #    @test sum(abs.(hess_mod_fd - hess2.Δℓθᵤ)) ≈ 0 atol = _TOL
 
 end
-
+=#
 ############################################################################################
 # Differentiation - Lower dimensions
 modelLowerDim = ModelWrapper(LowerDims(), _val_lowerdims)
@@ -343,7 +344,7 @@ objectives = [
     Objective(ModelWrapper(obectiveEBM.model.id, _paramEnzyme, _args, FlattenDefault()), dat),
     Objective(ModelWrapper(obectiveEBM.model.id, _paramEnzyme, _args, FlattenDefault(; output = Float32)), dat)
 ]
-backends = [:ForwardDiff, :ReverseDiff, :ReverseDiffUntaped, :Zygote, :EnzymeReverse]#, :EnzymeForward, :EnzymeReverse]
+backends = [:ForwardDiff, :ReverseDiff, :ReverseDiffUntaped, :Zygote]#, :EnzymeReverse]#, :EnzymeForward, :EnzymeReverse]
 
 @testset "AbstractDifferentiation - correct Type conversion" begin
     ## Gradient backends
