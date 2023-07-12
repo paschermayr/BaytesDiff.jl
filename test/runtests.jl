@@ -8,7 +8,7 @@ using Distributions, LinearAlgebra
 ############################################################################################
 # Import Baytes Packages
 using ModelWrappers
-using Main.BaytesDiff
+using BaytesDiff
 
 using ForwardDiff, ReverseDiff, Zygote, Enzyme
 
