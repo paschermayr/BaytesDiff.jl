@@ -121,17 +121,17 @@ val_dist = (
         [2.0, 2.0],
     ),
     ## LKJ
-    d_l1=Param(Distributions.LKJ(2, 1.0), [1.0 0.16; 0.16 1.0], ),
+    d_l1=Param(Distributions.LKJ(2, 1.0), rand(_RNG, Distributions.LKJ(2, 1.0)), ),
     d_l2=Param(
         [Distributions.LKJ(2, 1.0), Distributions.LKJ(2, 1.0)],
         [[1.0 0.20; 0.20 1.0], [1.0 0.24; 0.24 1.0]],
     ),
-    d_l3=Param(Distributions.LKJ(3, 1.0), [1.0 0.16 0.16; 0.16 1.0 0.16; 0.16 0.16 1.0], ),
+    d_l3=Param(Distributions.LKJ(3, 1.0), rand(_RNG, Distributions.LKJ(3, 1.0)), ),
     d_l4=Param(
         [Distributions.LKJ(3, 1.0), Distributions.LKJ(3, 1.0)],
         [
-            [1.0 0.16 0.16; 0.16 1.0 0.16; 0.16 0.16 1.0],
-            [1.0 0.16 0.16; 0.16 1.0 0.16; 0.16 0.16 1.0],
+            rand(_RNG, Distributions.LKJ(3, 1.0)),
+            rand(_RNG, Distributions.LKJ(3, 1.0)),
         ],
     ),
     ## Truncated

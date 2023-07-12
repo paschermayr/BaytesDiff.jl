@@ -1,7 +1,7 @@
 name = "BaytesDiff"
 uuid = "12a76ff9-393d-487f-8b39-e615b97e2f77"
 authors = ["Patrick Aschermayr <p.aschermayr@gmail.com>"]
-version = "0.2.4"
+version = "0.2.5"
 
 [deps]
 ArgCheck = "dce04be8-c92d-5529-be00-80e4d2c0e197"
@@ -27,7 +27,7 @@ DistributionsAD = "0.6"
 DocStringExtensions = "0.8, 0.9"
 Enzyme = "0.11"
 ForwardDiff = "0.10"
-ModelWrappers = "0.4"
+ModelWrappers = "0.5"
 ReverseDiff = "1.14"
 Zygote = "0.6"
 SimpleUnPack = "1"

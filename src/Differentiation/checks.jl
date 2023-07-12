@@ -12,7 +12,7 @@ function check_gradients(
     _rng::Random.AbstractRNG,
     objective::Objective,
     ADlibraries = [:ForwardDiff, :ReverseDiff, :Zygote],
-    θᵤ = randn(_rng, length(objective)),
+    θᵤ = randn(_rng, ModelWrappers.length_unconstrained(objective)),
     difftune = map(backend -> DiffObjective(objective, AutomaticDiffTune(objective, backend)), ADlibraries);
     printoutput = true
 )

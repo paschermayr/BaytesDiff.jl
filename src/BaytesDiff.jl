@@ -16,6 +16,7 @@ using BaytesCore:
 using ModelWrappers:
     ModelWrappers,
     ModelWrapper,
+    length_unconstrained,
     Tagged,
     Objective,
     unconstrain_flatten,
@@ -40,7 +41,6 @@ using ForwardDiff, ReverseDiff, Zygote, Enzyme
 include("Differentiation/Differentiation.jl")
 
 ############################################################################################
-#export
 #export
 
 end

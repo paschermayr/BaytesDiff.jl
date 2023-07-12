@@ -7,7 +7,7 @@ objectiveExample = Objective(modelExample, (data1, data2, data3, _idx))
     AutomaticDiffTune(objectiveExample, :ForwardDiff)
     tune_fwd = AutomaticDiffTune(objectiveExample, :ForwardDiff, DiffOrderOne())
     fwd = DiffObjective(objectiveExample, tune_fwd)
-    theta_unconstrained = randn(_RNG, length(modelExample))
+    theta_unconstrained = randn(_RNG, ModelWrappers.length_unconstrained(modelExample))
     ## Compute logdensity
     log_density(objectiveExample, tune_fwd, theta_unconstrained)
     theta_unconstrained2 = deepcopy(theta_unconstrained)
@@ -53,7 +53,7 @@ end
     fwd = DiffObjective(objectiveExample, tune_fwd)
     rd = DiffObjective(objectiveExample, tune_rd)
     zyg = DiffObjective(objectiveExample, tune_zyg)
-    theta_unconstrained = randn(_RNG, length(modelExample))
+    theta_unconstrained = randn(_RNG, ModelWrappers.length_unconstrained(modelExample))
     ## Compute logdensity
     log_density(objectiveExample, tune_fwd, theta_unconstrained)
     log_density(fwd, theta_unconstrained)
@@ -117,7 +117,7 @@ end
     BaytesDiff.update(tune_rd, objectiveExample)
     BaytesDiff.update(tune_zyg, objectiveExample)
     ## Config DiffTune
-    theta_unconstrained2 = randn(_RNG, length(objectiveExample))
+    theta_unconstrained2 = randn(_RNG, ModelWrappers.length_unconstrained(objectiveExample))
     BaytesDiff._config(BaytesDiff.ADForward(), DiffOrderZero(), objectiveExample, theta_unconstrained2)
     BaytesDiff._config(BaytesDiff.ADReverse(), DiffOrderZero(), objectiveExample, theta_unconstrained2)
     BaytesDiff._config(BaytesDiff.ADReverseUntaped(), DiffOrderZero(), objectiveExample, theta_unconstrained2)
@@ -148,7 +148,7 @@ objectiveHessian = Objective(modelHBM, data1)
 #    rd = DiffObjective(_objective, tune_rd)
     rdu = DiffObjective(_objective, tune_rdu)
     zyg = DiffObjective(_objective, tune_zyg)
-    theta_unconstrained = randn(_RNG, length(modelExample))
+    theta_unconstrained = randn(_RNG, ModelWrappers.length_unconstrained(modelExample))
 
     ## Compute logdensity
     _ld = log_density(_objective, tune_fwd, theta_unconstrained)
@@ -186,7 +186,7 @@ end
 
 ############################################################################################
 # Differentiation - Enzyme
-#=
+# #=
 @testset "AutoDiffContainer - Log Objective AutoDiff compatibility - Enzyme" begin
     ## Assign DiffTune
     _objective = obectiveEBM
@@ -204,7 +204,7 @@ end
     rd1 = DiffObjective(_objective, tune_rd1)
     rd2 = DiffObjective(_objective, tune_rd2)
 
-    theta_unconstrained = randn(_RNG, length(modelExample))
+    theta_unconstrained = randn(_RNG, ModelWrappers.length_unconstrained(modelExample))
 
     ## Compute logdensity
     _ld = log_density(_objective, tune_fwd0, theta_unconstrained)
@@ -246,7 +246,7 @@ end
     fwd = DiffObjective(objectiveLowerDim, autodiff_fd)
     rd = DiffObjective(objectiveLowerDim, autodiff_rd)
     zyg = DiffObjective(objectiveLowerDim, autodiff_zyg)
-    theta_unconstrained = randn(_RNG, length(objectiveLowerDim))
+    theta_unconstrained = randn(_RNG, ModelWrappers.length_unconstrained(objectiveLowerDim))
     ## Compute Diffresult
     ld1 = log_density(fwd, theta_unconstrained)
     ld2 = log_density(rd, theta_unconstrained)
@@ -293,7 +293,7 @@ zyg = DiffObjective(objectiveExample2, AutomaticDiffTune(objectiveExample2, :Zyg
 
 @testset "AutoDiffContainer - Float32 compatibility" begin
     T = Float32
-    theta_unconstrained = randn(T, length(objectiveExample2))
+    theta_unconstrained = randn(T, ModelWrappers.length_unconstrained(objectiveExample2))
     ## Compute Diffresult
     ld1 = log_density(fwd, theta_unconstrained)
     ld2 = log_density(rd, theta_unconstrained)
@@ -323,7 +323,7 @@ end
 function fun2(objective::Objective{<:ModelWrapper{M}}, θᵤ::AbstractVector{T}) where {M<:ExampleModel, T<:Real}
     return zeros(size(θᵤ, 1), size(θᵤ, 1))
 end
-θᵤ = randn(_RNG, length(objectiveExample))
+θᵤ = randn(_RNG, ModelWrappers.length_unconstrained(objectiveExample))
 fun1(objectiveExample, θᵤ)
 @testset "AnalyticDiffTune - " begin
     AnalyticalDiffTune(fun1, nothing)
@@ -349,10 +349,10 @@ backends = [:ForwardDiff, :ReverseDiff, :ReverseDiffUntaped, :Zygote]#, :EnzymeR
 @testset "AbstractDifferentiation - correct Type conversion" begin
     ## Gradient backends
     for backend in backends
-        for _objective in objectives
+        for _objectivein objectives
             #Check type
             valtype = typeof(_objective.temperature)
-            θᵤ = randn(valtype, length(_objective))
+            θᵤ = randn(valtype, ModelWrappers.length_unconstrained(_objective))
 
             #Create tune
             difftune0 = AutomaticDiffTune(_objective, backend, DiffOrderZero())
@@ -374,3 +374,6 @@ backends = [:ForwardDiff, :ReverseDiff, :ReverseDiffUntaped, :Zygote]#, :EnzymeR
         end
     end
 end
+
+
+

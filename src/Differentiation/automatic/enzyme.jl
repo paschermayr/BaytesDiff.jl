@@ -24,7 +24,7 @@ function _log_density_and_gradient(
 ) where {T<:Real}
     error("Enzyme AD Forward Mode framework currently not implemented")
 #=
-    _shadow = zeros(T, length(θᵤ))
+    _shadow = zeros(T, ModelWrappers.length(θᵤ))
     val, _ = Enzyme.autodiff(Enzyme.ForwardMode(), objective, Enzyme.Duplicated,
         Enzyme.Duplicated(θᵤ, _shadow),
         Enzyme.Const(objective.model.arg),
@@ -63,10 +63,10 @@ end
 function _log_density_and_gradient(
     objective::Objective, tune::AutomaticDiffTune{ADEnzymeReverse}, order::DiffOrderOne, θᵤ::AbstractVector{T}
 ) where {T<:Real}
-    _shadow = zeros(T, length(θᵤ))
+    _shadow = zeros(T, ModelWrappers.length(θᵤ))
     #=
     #!NOTE: Version that computes both density and gradient that should be available soon
-    val, grad = Enzyme.autodiff(Enzyme.ReverseMode(), objective, Enzyme.Duplicated,
+    val, grad = Enzyme.autodiff(Enzyme.ReverseWithPrimal(), objective, Enzyme.Duplicated,
         Enzyme.Duplicated(θᵤ, _shadow),
         Enzyme.Const(objective.model.arg),
         Enzyme.Const(objective.data),
@@ -74,7 +74,7 @@ function _log_density_and_gradient(
     return val, grad
     =#
     #!NOTE: Need to explicitly state fields of objective as constant, otherwise mutation occurs for objective.data and objective.model.arg.
-    Enzyme.autodiff(Enzyme.ReverseMode(), objective, Enzyme.Active,
+    Enzyme.autodiff(Enzyme.ReverseWithPrimal(), objective, Enzyme.Active,
         Enzyme.Duplicated(θᵤ, _shadow),
         Enzyme.Const(objective.model.arg),
         Enzyme.Const(objective.data),
