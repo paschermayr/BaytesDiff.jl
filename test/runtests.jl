@@ -15,8 +15,8 @@ using ForwardDiff, ReverseDiff, Zygote, Enzyme
 
 ############################################################################################
 # Include Files
-include("TestHelper.jl")
-include("TestModels.jl")
+include("TestHelper.jl");
+include("TestModels.jl");
 
 ############################################################################################
 # Run Tests

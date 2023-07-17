@@ -229,7 +229,8 @@ end
 #    @test sum(abs.(hess_mod_fd - hess2.Δℓθᵤ)) ≈ 0 atol = _TOL
 
 end
-=#
+# =#
+
 ############################################################################################
 # Differentiation - Lower dimensions
 modelLowerDim = ModelWrapper(LowerDims(), _val_lowerdims)
@@ -343,13 +344,33 @@ end
 objectives = [
     Objective(ModelWrapper(obectiveEBM.model.id, _paramEnzyme, _args, FlattenDefault()), dat),
     Objective(ModelWrapper(obectiveEBM.model.id, _paramEnzyme, _args, FlattenDefault(; output = Float32)), dat)
-]
-backends = [:ForwardDiff, :ReverseDiff, :ReverseDiffUntaped, :Zygote]#, :EnzymeReverse]#, :EnzymeForward, :EnzymeReverse]
+];
+backends = [:ForwardDiff, :ReverseDiff, :ReverseDiffUntaped, :Zygote, :EnzymeForward, :EnzymeReverse]#, :EnzymeReverse]#, :EnzymeForward, :EnzymeReverse]
 
+#=
+backend = backends[end-1]
+a = Float32.(randn(10))
+_shadow = Enzyme.onehot(a)
+b = Enzyme.BatchDuplicated(a, _shadow)
+collect(b)
+
+θᵤ
+_shadow = Enzyme.onehot(θᵤ)
+objective = _objective
+ℓ, ∂θᵤ = Enzyme.autodiff(Enzyme.Forward, objective, Enzyme.BatchDuplicated,
+    Enzyme.BatchDuplicated(θᵤ, _shadow),
+    Enzyme.Const(objective.model.arg),
+    Enzyme.Const(objective.data),
+)
+ℓ
+∂θᵤ
+_shadow
+BaytesDiff.log_density_and_gradient(diffobjective1, θᵤ)
+=#
 @testset "AbstractDifferentiation - correct Type conversion" begin
     ## Gradient backends
     for backend in backends
-        for _objectivein objectives
+        for _objective in objectives
             #Check type
             valtype = typeof(_objective.temperature)
             θᵤ = randn(valtype, ModelWrappers.length_unconstrained(_objective))

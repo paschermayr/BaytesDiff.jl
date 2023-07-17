@@ -1,7 +1,7 @@
 name = "BaytesDiff"
 uuid = "12a76ff9-393d-487f-8b39-e615b97e2f77"
 authors = ["Patrick Aschermayr <p.aschermayr@gmail.com>"]
-version = "0.2.5"
+version = "0.2.6"
 
 [deps]
 ArgCheck = "dce04be8-c92d-5529-be00-80e4d2c0e197"

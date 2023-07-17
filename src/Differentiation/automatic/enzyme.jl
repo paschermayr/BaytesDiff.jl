@@ -22,7 +22,7 @@ end
 function _log_density_and_gradient(
     objective::Objective, tune::AutomaticDiffTune{ADEnzymeForward}, order::DiffOrderOne, θᵤ::AbstractVector{T}
 ) where {T<:Real}
-    error("Enzyme AD Forward Mode framework currently not implemented")
+#    error("Enzyme AD Forward Mode framework currently not implemented")
 #=
     _shadow = zeros(T, ModelWrappers.length(θᵤ))
     val, _ = Enzyme.autodiff(Enzyme.ForwardMode(), objective, Enzyme.Duplicated,
@@ -32,6 +32,14 @@ function _log_density_and_gradient(
     )
     T(val), _shadow
 =#
+    _shadow = Enzyme.onehot(θᵤ)
+    ℓ, ∂θᵤ = Enzyme.autodiff(Enzyme.Forward, objective, Enzyme.BatchDuplicated,
+        Enzyme.BatchDuplicated(θᵤ, _shadow),
+        Enzyme.Const(objective.model.arg),
+        Enzyme.Const(objective.data),
+    )
+    #NOTE: need to do T.(collect(∂θᵤ)) for gradient vector as Enzyme seems to fix it to Float64 for some reason
+    return T(ℓ), T.(collect(∂θᵤ))
 end
 
 function _log_density_and_gradient_and_hessian(
@@ -63,7 +71,7 @@ end
 function _log_density_and_gradient(
     objective::Objective, tune::AutomaticDiffTune{ADEnzymeReverse}, order::DiffOrderOne, θᵤ::AbstractVector{T}
 ) where {T<:Real}
-    _shadow = zeros(T, ModelWrappers.length(θᵤ))
+    # _shadow = zeros(T, ModelWrappers.length(θᵤ))
     #=
     #!NOTE: Version that computes both density and gradient that should be available soon
     val, grad = Enzyme.autodiff(Enzyme.ReverseWithPrimal(), objective, Enzyme.Duplicated,
@@ -72,7 +80,7 @@ function _log_density_and_gradient(
         Enzyme.Const(objective.data),
     )
     return val, grad
-    =#
+    
     #!NOTE: Need to explicitly state fields of objective as constant, otherwise mutation occurs for objective.data and objective.model.arg.
     Enzyme.autodiff(Enzyme.ReverseWithPrimal(), objective, Enzyme.Active,
         Enzyme.Duplicated(θᵤ, _shadow),
@@ -80,6 +88,14 @@ function _log_density_and_gradient(
         Enzyme.Const(objective.data),
     )
     return T(objective(θᵤ)), _shadow
+    =#
+    _shadow = zeros(eltype(θᵤ), length(θᵤ))
+    _, ℓ = Enzyme.autodiff(ReverseWithPrimal, objective, Enzyme.Active,
+        Enzyme.Duplicated(θᵤ, _shadow),
+        Enzyme.Const(objective.model.arg),
+        Enzyme.Const(objective.data),
+    )
+    return T(ℓ), _shadow
 end
 
 function _log_density_and_gradient_and_hessian(
