@@ -2,7 +2,7 @@
 # Import External Packages
 using Test
 using Random: Random, AbstractRNG, seed!
-using ArgCheck
+using ArgCheck, SimpleUnPack
 using Distributions, LinearAlgebra
 
 ############################################################################################
@@ -11,7 +11,8 @@ using ModelWrappers
 using BaytesDiff
 
 using ForwardDiff, ReverseDiff, Zygote, Enzyme
-
+using PDMats
+import PDMats: PDMats, PDMat
 
 ############################################################################################
 # Include Files

@@ -278,3 +278,54 @@ _val_lowerdims = (;
     #        ldim_j3 = Param([15. .16 .16 ; .16 18. .16 ; .16 .16 20.], _iwish3),
     #        ldim_j4 = Param([[15. .16 .16 ; .16 18. .16 ; .16 .16 20.], [15. .16 .16 ; .16 18. .16 ; .16 .16 20.]],[_iwish3, _iwish3]),
 )
+
+############################################################################################
+# Model with Cholesky+Std Parametrization for MvNormal Distributions
+function PDMat(fac::Cholesky, scale::AbstractVector)
+    factors_scaled = fac.uplo == 'U' ? fac.factors .* scale' : scale .* fac.factors
+    return PDMat(Cholesky(factors_scaled, fac.uplo, 0))
+end
+
+N = 3
+_d = Distributions.LKJCholesky(N, 10.)
+ρ = rand(_d)
+
+struct MultiNormal <: ModelName end
+param_mvnormal = (;
+    μ = Param(
+        MvNormal(zeros(N), LinearAlgebra.diagm(repeat([10.], N) ) ), 
+        [iter+0.0 for iter in 1:N]
+    ),
+# THIS IS VOLATILITY OF DIAGONALS OF COVARIANCE MATRIX, NOT(!) THE VARIANCE
+    scale = Param(
+        [truncated( Normal(1, 10.), 0, 20) for _ in 1:N],
+        [iter+0.0 for iter in 1:N],
+    ),
+    ρ = Param(
+        _d,
+        ρ   # inverse(_b)( _b( ρ ) )
+    ),
+)
+
+function ModelWrappers.simulate(_RNG::Random.AbstractRNG, model::ModelWrapper{F}; Nsamples = 1000) where {F<:Union{MultiNormal}}
+    Σ = PDMat(model.val.ρ, model.val.scale)
+    return rand(_RNG, MvNormal(model.val.μ, Σ), Nsamples)
+end
+
+function (objective::Objective{<:ModelWrapper{M}})(θ::NamedTuple) where {M<:Union{MultiNormal}}
+    @unpack model, tagged, data = objective
+## Prior
+    lp = log_prior(tagged.info.transform.constraint, ModelWrappers.subset(θ, tagged.parameter) )
+##Likelihood
+    ll = 0.0
+#    Σ = PDMat(Symmetric( diagm(θ.scale) * θ.ρ.factors * θ.ρ.factors' * diagm(θ.scale) ))
+    ll = 0.0
+    for t in 1:size(data, 2)
+        #!Note: Reassign PDMat on purpose
+        Σ = PDMat(θ.ρ, θ.scale)
+        d =  MvNormal(θ.μ, Σ)
+        ll += logpdf(d, data[:,t])
+    end
+## Return Log Posterior
+    return ll + lp
+end

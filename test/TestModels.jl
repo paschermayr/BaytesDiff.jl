@@ -95,4 +95,4 @@ function (objective::Objective{<:ModelWrapper{ExampleModel}})(θ::NamedTuple)
 
     return ll + ll2 + ll3 + ll4 + ll5
 end
-############################################################################################
+

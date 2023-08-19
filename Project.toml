@@ -1,7 +1,7 @@
 name = "BaytesDiff"
 uuid = "12a76ff9-393d-487f-8b39-e615b97e2f77"
 authors = ["Patrick Aschermayr <p.aschermayr@gmail.com>"]
-version = "0.2.6"
+version = "0.2.7"
 
 [deps]
 ArgCheck = "dce04be8-c92d-5529-be00-80e4d2c0e197"
@@ -28,15 +28,16 @@ DocStringExtensions = "0.8, 0.9"
 Enzyme = "0.11"
 ForwardDiff = "0.10"
 ModelWrappers = "0.5"
-ReverseDiff = "1.14"
-Zygote = "0.6"
+ReverseDiff = "1.15"
 SimpleUnPack = "1"
-julia = "^1.8"
+Zygote = "0.6"
+julia = "^1.9"
 
 [extras]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+PDMats = "90014a1f-27ba-587c-ab20-58faa44d9150"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "Distributions", "LinearAlgebra"]
+test = ["Test", "Distributions", "LinearAlgebra", "PDMats"]

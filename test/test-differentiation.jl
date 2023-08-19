@@ -3,6 +3,7 @@
 modelExample = ModelWrapper(ExampleModel(), _val_examplemodel)
 objectiveExample = Objective(modelExample, (data1, data2, data3, _idx))
 
+############################################################################################
 @testset "AutoDiffContainer - Log Objective Results" begin
     AutomaticDiffTune(objectiveExample, :ForwardDiff)
     tune_fwd = AutomaticDiffTune(objectiveExample, :ForwardDiff, DiffOrderOne())
@@ -45,6 +46,7 @@ objectiveExample = Objective(modelExample, (data1, data2, data3, _idx))
 
 end
 
+############################################################################################
 @testset "AutoDiffContainer - Log Objective AutoDiff compatibility - Vectorized Model" begin
     ## Assign DiffTune
     tune_fwd = AutomaticDiffTune(objectiveExample, :ForwardDiff,)
@@ -134,7 +136,7 @@ end
     BaytesDiff._config(BaytesDiff.ADZygote(), DiffOrderTwo(), objectiveExample, theta_unconstrained2)
 end
 
-
+############################################################################################
 objectiveHessian = Objective(modelHBM, data1)
 @testset "AutoDiffContainer - Log Objective AutoDiff compatibility - Vectorized Model Hessian" begin
     ## Assign DiffTune
@@ -279,8 +281,6 @@ end
     ℓGradientResult(grad1.θᵤ , grad1.ℓθᵤ , grad1.∇ℓθᵤ)
 end
 
-
-
 ############################################################################################
 # Differentiation - Float32
 modelExample2 = ModelWrapper(ExampleModel(), _val_examplemodel, (;), FlattenDefault(; output = Float32))
@@ -305,6 +305,100 @@ zyg = DiffObjective(objectiveExample2, AutomaticDiffTune(objectiveExample2, :Zyg
     grad22 = log_density_and_gradient(rd2, theta_unconstrained)
     grad3 = log_density_and_gradient(zyg, theta_unconstrained)
     ## Compare types
+    @test ld1.ℓθᵤ isa T && eltype(ld1.θᵤ) == T
+    @test ld2.ℓθᵤ isa T && eltype(ld2.θᵤ) == T
+    @test ld22.ℓθᵤ isa T && eltype(ld22.θᵤ) == T
+    @test ld3.ℓθᵤ isa T && eltype(ld3.θᵤ) == T
+
+    @test grad1.ℓθᵤ isa T && eltype(grad1.θᵤ) == eltype(grad1.∇ℓθᵤ) == T
+    @test grad2.ℓθᵤ isa T && eltype(grad2.θᵤ) == eltype(grad2.∇ℓθᵤ) == T
+    @test grad22.ℓθᵤ isa T && eltype(grad22.θᵤ) == eltype(grad22.∇ℓθᵤ) == T
+    @test grad3.ℓθᵤ isa T && eltype(grad3.θᵤ) == eltype(grad3.∇ℓθᵤ) == T
+end
+
+############################################################################################
+# Differentiation - MV Normal correctness with supported backends
+model_mvnormal = ModelWrapper(MultiNormal(), param_mvnormal, (;),  FlattenDefault(; output = Float32) )
+data_mvnormal = simulate(_RNG, model_mvnormal)
+objective_mvnormal = Objective(model_mvnormal, data_mvnormal)
+θ_mvnormal = deepcopy(model_mvnormal.val)
+objective_mvnormal(θ_mvnormal)
+θ_t_mvnormal = randn(_RNG, length_unconstrained(objective_mvnormal) )
+objective_mvnormal(θ_t_mvnormal)
+
+fwd = DiffObjective(objective_mvnormal, AutomaticDiffTune(objective_mvnormal, :ForwardDiff, ));
+rd = DiffObjective(objective_mvnormal, AutomaticDiffTune(objective_mvnormal, :ReverseDiff));
+rd2 = DiffObjective(objective_mvnormal, AutomaticDiffTune(objective_mvnormal, :ReverseDiffUntaped));
+zyg = DiffObjective(objective_mvnormal, AutomaticDiffTune(objective_mvnormal, :Zygote));
+
+enzr = DiffObjective(objective_mvnormal, AutomaticDiffTune(objective_mvnormal, :EnzymeReverse));
+enzf = DiffObjective(objective_mvnormal, AutomaticDiffTune(objective_mvnormal, :EnzymeForward));
+
+@testset "AutoDiffContainer - MvNormal Model" begin
+    T = Float32
+    _TOL2 = 0.01
+    theta_unconstrained = randn(T, ModelWrappers.length_unconstrained(objective_mvnormal))
+## Compute Diffresult
+    ld = objective_mvnormal(theta_unconstrained)
+    ld1 = log_density(fwd, theta_unconstrained)
+    ld2 = log_density(rd, theta_unconstrained)
+    ld22 = log_density(rd2, theta_unconstrained)
+    ld3 = log_density(zyg, theta_unconstrained)
+    ld4 = log_density(enzr, theta_unconstrained)
+    ld44 = log_density(enzf, theta_unconstrained)
+
+    grad1 = log_density_and_gradient(fwd, theta_unconstrained)
+    grad2 = log_density_and_gradient(rd, theta_unconstrained)
+    grad22 = log_density_and_gradient(rd2, theta_unconstrained)
+    grad3 = log_density_and_gradient(zyg, theta_unconstrained)
+
+#    grad4 = log_density_and_gradient(enzr, theta_unconstrained)
+#    grad44 = log_density_and_gradient(enzf, theta_unconstrained)
+
+## Compare results
+    @test ld - ld1.ℓθᵤ ≈ 0 atol = _TOL2
+    @test ld - ld2.ℓθᵤ ≈ 0 atol = _TOL2
+    @test ld - ld22.ℓθᵤ ≈ 0 atol = _TOL2
+    @test ld - ld3.ℓθᵤ ≈ 0 atol = _TOL2
+    @test sum(abs.(grad1.∇ℓθᵤ - grad1.∇ℓθᵤ)) ≈ 0 atol = _TOL2
+    @test sum(abs.(grad1.∇ℓθᵤ - grad2.∇ℓθᵤ)) ≈ 0 atol = _TOL2
+    @test sum(abs.(grad1.∇ℓθᵤ - grad22.∇ℓθᵤ)) ≈ 0 atol = _TOL2
+    #!NOTE: Zygote still not fixed in latest Bijectors 13.6 release
+#    @test sum(abs.(grad1.∇ℓθᵤ - grad3.∇ℓθᵤ)) ≈ 0 atol = _TOL
+#    @test sum(abs.(grad1.∇ℓθᵤ - grad4.∇ℓθᵤ)) ≈ 0 atol = _TOL2
+#   @test sum(abs.(grad1.∇ℓθᵤ - grad44.∇ℓθᵤ)) ≈ 0 atol = _TOL2
+
+## Now make second step and check if taped results are still the same
+    theta_unconstrained = randn(T, ModelWrappers.length_unconstrained(objective_mvnormal))
+    ## Compute Diffresult
+    ld = objective_mvnormal(theta_unconstrained)
+    ld1 = log_density(fwd, theta_unconstrained)
+    ld2 = log_density(rd, theta_unconstrained)
+    ld22 = log_density(rd2, theta_unconstrained)
+    ld3 = log_density(zyg, theta_unconstrained)
+    grad1 = log_density_and_gradient(fwd, theta_unconstrained)
+    grad2 = log_density_and_gradient(rd, theta_unconstrained)
+    grad22 = log_density_and_gradient(rd2, theta_unconstrained)
+    grad3 = log_density_and_gradient(zyg, theta_unconstrained)
+
+#    grad4 = log_density_and_gradient(enzr, theta_unconstrained)
+#    grad44 = log_density_and_gradient(enzf, theta_unconstrained)
+
+## Compare results
+    @test ld - ld1.ℓθᵤ ≈ 0 atol = _TOL2
+    @test ld - ld2.ℓθᵤ ≈ 0 atol = _TOL2
+    @test ld - ld22.ℓθᵤ ≈ 0 atol = _TOL2
+    @test ld - ld3.ℓθᵤ ≈ 0 atol = _TOL2
+    @test sum(abs.(grad1.∇ℓθᵤ - grad1.∇ℓθᵤ)) ≈ 0 atol = _TOL2
+    @test sum(abs.(grad1.∇ℓθᵤ - grad2.∇ℓθᵤ)) ≈ 0 atol = _TOL2
+    @test sum(abs.(grad1.∇ℓθᵤ - grad22.∇ℓθᵤ)) ≈ 0 atol = _TOL2
+
+    #!NOTE: Zygote still not fixed in latest Bijectors 13.6 release
+#    @test sum(abs.(grad1.∇ℓθᵤ - grad3.∇ℓθᵤ)) ≈ 0 atol = _TOL
+#    @test sum(abs.(grad1.∇ℓθᵤ - grad4.∇ℓθᵤ)) ≈ 0 atol = _TOL2
+#   @test sum(abs.(grad1.∇ℓθᵤ - grad44.∇ℓθᵤ)) ≈ 0 atol = _TOL2
+
+## Compare types
     @test ld1.ℓθᵤ isa T && eltype(ld1.θᵤ) == T
     @test ld2.ℓθᵤ isa T && eltype(ld2.θᵤ) == T
     @test ld22.ℓθᵤ isa T && eltype(ld22.θᵤ) == T
