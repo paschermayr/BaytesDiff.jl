@@ -29,14 +29,6 @@ function AutomaticDiffTune(objective::Objective, backend::Symbol, order::Abstrac
 end
 
 ############################################################################################
-#=
-include("forwarddiff.jl")
-include("reversediff.jl")
-include("zygote.jl")
-include("enzyme.jl")
-=#
-
-############################################################################################
 function update(
     tune::AutomaticDiffTune,
     objective::Objective)
