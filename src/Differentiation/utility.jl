@@ -1,3 +1,4 @@
+#=
 ############################################################################################
 """
 $(SIGNATURES)
@@ -28,18 +29,7 @@ function _diffresults_hessianbuffer(θᵤ::AbstractVector{T}) where {T<:Real}
     len = length(θᵤ)
     return DiffResults.MutableDiffResult(zero(S), (similar(θᵤ, S), zeros(S, len, len)))
 end
-
-############################################################################################
-#Helper function for ReverseDiff package
-function checkfinite(θ::ReverseDiff.TrackedArray{T}, max_val::R=max_val) where {T,R<:Real}
-    @inbounds @simd for iter in eachindex(θ)
-        if !checkfinite(θ[iter], max_val=max_val)
-            return false
-        end
-    end
-    return true
-end
-
+=#
 ############################################################################################
 #Export
-export checkfinite
+#export checkfinite

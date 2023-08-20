@@ -1,3 +1,4 @@
+#=
 ############################################################################################
 """
 $(SIGNATURES)
@@ -63,7 +64,7 @@ function check_gradients(
         Forward_Reverse_diff = fdrd_diff,
     )
 end
-
+=#
 ############################################################################################
 # Error handling
 function checkfinite(θₜ::AbstractVector{T}) where {T<:Real}
@@ -126,6 +127,6 @@ end
 ############################################################################################
 # Export
 export
-    check_gradients,
+#    check_gradients,
     checkfinite,
     ObjectiveError

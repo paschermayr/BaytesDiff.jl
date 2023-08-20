@@ -3,6 +3,7 @@
 modelExample = ModelWrapper(ExampleModel(), _val_examplemodel)
 objectiveExample = Objective(modelExample, (data1, data2, data3, _idx))
 
+
 ############################################################################################
 @testset "AutoDiffContainer - Log Objective Results" begin
     AutomaticDiffTune(objectiveExample, :ForwardDiff)
@@ -112,8 +113,8 @@ end
     @test sum(abs.(grad_mod_rd - grad2.∇ℓθᵤ)) ≈ 0 atol = _TOL
     @test sum(abs.(grad_mod_zy - grad3.∇ℓθᵤ)) ≈ 0 atol = _TOL
     ## Checks
-    _output = check_gradients(_RNG, objectiveExample, [:ForwardDiff, :ReverseDiff, :Zygote]; printoutput = false)
-    @test sum(abs.(_output.ℓobjective_gradient_diff)) ≈ 0 atol = _TOL
+#    _output = check_gradients(_RNG, objectiveExample, [:ForwardDiff, :ReverseDiff, :Zygote]; printoutput = false)
+#    @test sum(abs.(_output.ℓobjective_gradient_diff)) ≈ 0 atol = _TOL
     ## Update DiffTune
     BaytesDiff.update(tune_fwd, objectiveExample)
     BaytesDiff.update(tune_rd, objectiveExample)
@@ -273,8 +274,8 @@ end
     @test sum(abs.(grad_mod_rd - grad2.∇ℓθᵤ)) ≈ 0 atol = _TOL
     @test sum(abs.(grad_mod_zy - grad3.∇ℓθᵤ)) ≈ 0 atol = _TOL
     ## Checks
-    _output = check_gradients(_RNG, objectiveLowerDim, [:ForwardDiff, :ReverseDiff, :Zygote]; printoutput = false)
-    @test sum(abs.(_output.ℓobjective_gradient_diff)) ≈ 0 atol = _TOL
+ #   _output = check_gradients(_RNG, objectiveLowerDim, [:ForwardDiff, :ReverseDiff, :Zygote]; printoutput = false)
+ #   @test sum(abs.(_output.ℓobjective_gradient_diff)) ≈ 0 atol = _TOL
     ## Results
     ℓDensityResult(objectiveLowerDim, theta_unconstrained)
     ℓDensityResult(objectiveLowerDim)
@@ -489,6 +490,3 @@ BaytesDiff.log_density_and_gradient(diffobjective1, θᵤ)
         end
     end
 end
-
-
-

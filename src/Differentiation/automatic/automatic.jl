@@ -29,10 +29,12 @@ function AutomaticDiffTune(objective::Objective, backend::Symbol, order::Abstrac
 end
 
 ############################################################################################
+#=
 include("forwarddiff.jl")
 include("reversediff.jl")
 include("zygote.jl")
 include("enzyme.jl")
+=#
 
 ############################################################################################
 function update(
@@ -42,6 +44,16 @@ function update(
 end
 
 ############################################################################################
+# Define AD Type Methods that will be extended in ext with Packages
+struct ADForward <: AutomaticDifferentiationMethod end
+struct ADReverse <: AutomaticDifferentiationMethod end
+struct ADReverseUntaped <: AutomaticDifferentiationMethod end
+struct ADZygote <: AutomaticDifferentiationMethod end
+struct ADEnzymeForward <: AutomaticDifferentiationMethod end
+struct ADEnzymeReverse <: AutomaticDifferentiationMethod end
+
+############################################################################################
+# Define functions that will be dispatched in ext with Packages
 function _log_density(
     objective::Objective, tune::AutomaticDiffTune, order::AbstractDiffOrder, θᵤ::AbstractVector{T}
 ) where {T<:Real}
@@ -67,4 +79,12 @@ end
 
 ############################################################################################
 # Export
-export AutomaticDiffTune
+export 
+    AutomaticDiffTune,
+    ADForward,
+    ADReverse,
+    ADReverseUntaped,
+    ADZygote,
+    ADEnzymeForward,
+    ADEnzymeReverse
+
