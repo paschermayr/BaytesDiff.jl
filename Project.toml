@@ -1,7 +1,7 @@
 name = "BaytesDiff"
 uuid = "12a76ff9-393d-487f-8b39-e615b97e2f77"
 authors = ["Patrick Aschermayr <p.aschermayr@gmail.com>"]
-version = "0.3.0"
+version = "0.3.1"
 
 [deps]
 ArgCheck = "dce04be8-c92d-5529-be00-80e4d2c0e197"
@@ -14,6 +14,7 @@ SimpleUnPack = "ce78b400-467f-4804-87d8-8f486da07d0a"
 [weakdeps]
 DiffResults = "163ba53b-c6d8-5494-b064-1a9d43ac40c5"
 Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
+FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 ReverseDiff = "37e2e3b7-166d-5795-8a7a-e32c996b4267"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
@@ -23,6 +24,7 @@ BaytesDiffEnzymeExt = "Enzyme"
 BaytesDiffForwardDiffExt = ["ForwardDiff", "DiffResults"]
 BaytesDiffReverseDiffExt = ["ReverseDiff", "DiffResults"]
 BaytesDiffZygoteExt = "Zygote"
+BaytesDiffFiniteDifferencesExt = "FiniteDifferences"
 
 [compat]
 ArgCheck = "2"
@@ -30,6 +32,7 @@ BaytesCore = "0.2"
 DiffResults = "1"
 DocStringExtensions = "0.8, 0.9"
 Enzyme = "0.11"
+FiniteDifferences = "0.12"
 ForwardDiff = "0.10"
 ModelWrappers = "0.5"
 ReverseDiff = "1.15"
@@ -44,4 +47,4 @@ PDMats = "90014a1f-27ba-587c-ab20-58faa44d9150"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test", "Distributions", "LinearAlgebra", "PDMats", "Enzyme", "ForwardDiff", "ReverseDiff", "Zygote", "DiffResults"]
+test = ["Test", "Distributions", "LinearAlgebra", "PDMats", "Enzyme", "FiniteDifferences", "ForwardDiff", "ReverseDiff", "Zygote", "DiffResults"]

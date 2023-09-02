@@ -10,7 +10,7 @@ using Distributions, LinearAlgebra
 using ModelWrappers
 using BaytesDiff
 
-using ForwardDiff, ReverseDiff, Zygote, Enzyme
+using FiniteDifferences, ForwardDiff, ReverseDiff, Zygote, Enzyme
 using PDMats
 import PDMats: PDMats, PDMat
 

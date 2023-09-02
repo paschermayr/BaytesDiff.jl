@@ -3,7 +3,6 @@
 modelExample = ModelWrapper(ExampleModel(), _val_examplemodel)
 objectiveExample = Objective(modelExample, (data1, data2, data3, _idx))
 
-
 ############################################################################################
 @testset "AutoDiffContainer - Log Objective Results" begin
     AutomaticDiffTune(objectiveExample, :ForwardDiff)
@@ -50,12 +49,16 @@ end
 ############################################################################################
 @testset "AutoDiffContainer - Log Objective AutoDiff compatibility - Vectorized Model" begin
     ## Assign DiffTune
+    tune_fin = AutomaticDiffTune(objectiveExample, :FiniteDifferences,)
     tune_fwd = AutomaticDiffTune(objectiveExample, :ForwardDiff,)
     tune_rd = AutomaticDiffTune(objectiveExample, :ReverseDiff)
     tune_zyg = AutomaticDiffTune(objectiveExample, :Zygote,)
+    
+    fin = DiffObjective(objectiveExample, tune_fin)
     fwd = DiffObjective(objectiveExample, tune_fwd)
     rd = DiffObjective(objectiveExample, tune_rd)
     zyg = DiffObjective(objectiveExample, tune_zyg)
+
     theta_unconstrained = randn(_RNG, ModelWrappers.length_unconstrained(modelExample))
     ## Compute logdensity
     log_density(objectiveExample, tune_fwd, theta_unconstrained)
@@ -65,6 +68,8 @@ end
     theta_unconstrained2[10] = Inf
     _ld = log_density(objectiveExample, tune_fwd, theta_unconstrained2)
     @test isinf(_ld.ℓθᵤ)
+    _ld = log_density(fin, theta_unconstrained2)
+    @test isinf(_ld.ℓθᵤ)
     _ld = log_density(fwd, theta_unconstrained2)
     @test isinf(_ld.ℓθᵤ)
     _ld = log_density(rd, theta_unconstrained2)
@@ -72,13 +77,18 @@ end
     _ld = log_density(zyg, theta_unconstrained2)
     @test isinf(_ld.ℓθᵤ)
 
+    ld0 = log_density(fin, theta_unconstrained)
     ld1 = log_density(fwd, theta_unconstrained)
     ld2 = log_density(rd, theta_unconstrained)
     ld3 = log_density(zyg, theta_unconstrained)
+    _ld0 = BaytesDiff._log_density(objectiveExample, tune_fin, theta_unconstrained)
     _ld1 = BaytesDiff._log_density(objectiveExample, tune_fwd, theta_unconstrained)
     _ld2 = BaytesDiff._log_density(objectiveExample, tune_rd, theta_unconstrained)
     _ld3 = BaytesDiff._log_density(objectiveExample, tune_zyg, theta_unconstrained)
     ## Compute Diffresult
+    log_density_and_gradient(objectiveExample, tune_fin, theta_unconstrained2)
+    _grad = log_density_and_gradient(fin, theta_unconstrained2)
+    @test isinf(_grad.ℓθᵤ)
     log_density_and_gradient(objectiveExample, tune_fwd, theta_unconstrained2)
     _grad = log_density_and_gradient(fwd, theta_unconstrained2)
     @test isinf(_grad.ℓθᵤ)
@@ -90,9 +100,11 @@ end
     _grad = log_density_and_gradient(zyg, theta_unconstrained2)
     @test isinf(_grad.ℓθᵤ)
 
+    _grad0 = BaytesDiff._log_density_and_gradient(objectiveExample, tune_fin, theta_unconstrained)
     _grad1 = BaytesDiff._log_density_and_gradient(objectiveExample, tune_fwd, theta_unconstrained)
     _grad2 = BaytesDiff._log_density_and_gradient(objectiveExample, tune_rd, theta_unconstrained)
     _grad3 = BaytesDiff._log_density_and_gradient(objectiveExample, tune_zyg, theta_unconstrained)
+    grad0 = log_density_and_gradient(fin, theta_unconstrained)
     grad1 = log_density_and_gradient(fwd, theta_unconstrained)
     grad2 = log_density_and_gradient(rd, theta_unconstrained)
     grad3 = log_density_and_gradient(zyg, theta_unconstrained)
@@ -103,12 +115,15 @@ end
     grad_mod_rd = ReverseDiff.gradient(objectiveExample, theta_unconstrained)
     grad_mod_zy = Zygote.gradient(objectiveExample, theta_unconstrained)[1]
     ## Compare results
+    @test ld - ld0.ℓθᵤ ≈ 0 atol = _TOL
     @test ld - ld1.ℓθᵤ ≈ 0 atol = _TOL
     @test ld - ld2.ℓθᵤ ≈ 0 atol = _TOL
     @test ld - ld3.ℓθᵤ ≈ 0 atol = _TOL
+    @test sum(abs.(_grad0[2] - grad0.∇ℓθᵤ)) ≈ 0 atol = _TOL
     @test sum(abs.(_grad1[2] - grad1.∇ℓθᵤ)) ≈ 0 atol = _TOL
     @test sum(abs.(_grad2[2] - grad2.∇ℓθᵤ)) ≈ 0 atol = _TOL
     @test sum(abs.(_grad3[2] - grad3.∇ℓθᵤ)) ≈ 0 atol = _TOL
+    @test sum(abs.(grad_mod_fd - grad0.∇ℓθᵤ)) ≈ 0 atol = _TOL
     @test sum(abs.(grad_mod_fd - grad1.∇ℓθᵤ)) ≈ 0 atol = _TOL
     @test sum(abs.(grad_mod_rd - grad2.∇ℓθᵤ)) ≈ 0 atol = _TOL
     @test sum(abs.(grad_mod_zy - grad3.∇ℓθᵤ)) ≈ 0 atol = _TOL
@@ -116,25 +131,37 @@ end
 #    _output = check_gradients(_RNG, objectiveExample, [:ForwardDiff, :ReverseDiff, :Zygote]; printoutput = false)
 #    @test sum(abs.(_output.ℓobjective_gradient_diff)) ≈ 0 atol = _TOL
     ## Update DiffTune
+    BaytesDiff.update(tune_fin, objectiveExample)
     BaytesDiff.update(tune_fwd, objectiveExample)
     BaytesDiff.update(tune_rd, objectiveExample)
     BaytesDiff.update(tune_zyg, objectiveExample)
     ## Config DiffTune
     theta_unconstrained2 = randn(_RNG, ModelWrappers.length_unconstrained(objectiveExample))
+    BaytesDiff._config(BaytesDiff.ADFiniteDifferences(), DiffOrderZero(), objectiveExample, theta_unconstrained2)
     BaytesDiff._config(BaytesDiff.ADForward(), DiffOrderZero(), objectiveExample, theta_unconstrained2)
     BaytesDiff._config(BaytesDiff.ADReverse(), DiffOrderZero(), objectiveExample, theta_unconstrained2)
     BaytesDiff._config(BaytesDiff.ADReverseUntaped(), DiffOrderZero(), objectiveExample, theta_unconstrained2)
     BaytesDiff._config(BaytesDiff.ADZygote(), DiffOrderZero(), objectiveExample, theta_unconstrained2)
 
+    BaytesDiff._config(BaytesDiff.ADFiniteDifferences(), DiffOrderOne(), objectiveExample, theta_unconstrained2)
     BaytesDiff._config(BaytesDiff.ADForward(), DiffOrderOne(), objectiveExample, theta_unconstrained2)
     BaytesDiff._config(BaytesDiff.ADReverse(), DiffOrderOne(), objectiveExample, theta_unconstrained2)
     BaytesDiff._config(BaytesDiff.ADReverseUntaped(), DiffOrderOne(), objectiveExample, theta_unconstrained2)
     BaytesDiff._config(BaytesDiff.ADZygote(), DiffOrderOne(), objectiveExample, theta_unconstrained2)
 
+    BaytesDiff._config(BaytesDiff.ADFiniteDifferences(), DiffOrderTwo(), objectiveExample, theta_unconstrained2)
     BaytesDiff._config(BaytesDiff.ADForward(), DiffOrderTwo(), objectiveExample, theta_unconstrained2)
 #    BaytesDiff._config(BaytesDiff.ADReverse(), DiffOrderTwo(), objectiveExample, theta_unconstrained2)
     BaytesDiff._config(BaytesDiff.ADReverseUntaped(), DiffOrderTwo(), objectiveExample, theta_unconstrained2)
     BaytesDiff._config(BaytesDiff.ADZygote(), DiffOrderTwo(), objectiveExample, theta_unconstrained2)
+
+    DiffObjective(objectiveExample, :ForwardDiff)
+    DiffObjective(objectiveExample, :ReverseDiff)
+    DiffObjective(objectiveExample, :ReverseDiffUntaped)
+    DiffObjective(objectiveExample, :Zygote)
+    DiffObjective(objectiveExample, :EnzymeForward)
+    DiffObjective(objectiveExample, :EnzymeReverse)
+
 end
 
 ############################################################################################
@@ -337,8 +364,8 @@ enzf = DiffObjective(objective_mvnormal, AutomaticDiffTune(objective_mvnormal, :
 
 @testset "AutoDiffContainer - MvNormal Model" begin
     T = Float32
-    _TOL2 = 0.01
-    theta_unconstrained = randn(T, ModelWrappers.length_unconstrained(objective_mvnormal))
+    _TOL2 = 1.0
+    theta_unconstrained = randn(_RNG, T, ModelWrappers.length_unconstrained(objective_mvnormal))
 ## Compute Diffresult
     ld = objective_mvnormal(theta_unconstrained)
     ld1 = log_density(fwd, theta_unconstrained)

@@ -14,6 +14,13 @@ struct DiffObjective{O<:Objective,T<:AbstractDifferentiableTune}
     tune::T
 end
 
+# Convenience constructor that makes default struct easier to work with
+function DiffObjective(objective::Objective, backend::Symbol, order::AbstractDiffOrder = DiffOrderOne())
+    tune = AutomaticDiffTune(objective, backend, order)
+    return DiffObjective(objective, tune)
+end
+
+
 ############################################################################################
 function log_density(
     diff::DiffObjective,

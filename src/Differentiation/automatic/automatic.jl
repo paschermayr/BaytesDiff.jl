@@ -37,10 +37,14 @@ end
 
 ############################################################################################
 # Define AD Type Methods that will be extended in ext with Packages
+struct ADFiniteDifferences <: AutomaticDifferentiationMethod end
+
 struct ADForward <: AutomaticDifferentiationMethod end
 struct ADReverse <: AutomaticDifferentiationMethod end
 struct ADReverseUntaped <: AutomaticDifferentiationMethod end
+
 struct ADZygote <: AutomaticDifferentiationMethod end
+
 struct ADEnzymeForward <: AutomaticDifferentiationMethod end
 struct ADEnzymeReverse <: AutomaticDifferentiationMethod end
 
